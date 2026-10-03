@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposal Writer</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #fff; --ink: #14181f; --muted: #667085; --line: #e3e6eb; --brand: #0e7490; --brand-soft: #e6f4f8;
+    --ok: #067647; --ok-soft: #ecfdf3; --bad: #b42318; --bad-soft: #fef3f2; --wait: #b54708; --wait-soft: #fff6ed; --grey-soft: #eef1f6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14.5px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .hidden { display: none !important; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 28px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; letter-spacing: -0.01em; }
+  .pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--line); background: var(--panel); padding: 4px 10px; border-radius: 999px; }
+  .pill.use { color: var(--brand); border-color: #b9e0ea; background: var(--brand-soft); font-weight: 600; }
+  button, input, textarea, select { font: inherit; }
+  .btn { font-weight: 600; border-radius: 9px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.danger { color: var(--bad); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .link { background: none; border: 0; color: var(--brand); font-weight: 600; cursor: pointer; padding: 0; }
+  main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 0 28px 28px; max-width: 1180px; margin: 0 auto; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; height: min(820px, calc(100vh - 96px)); min-height: 520px; overflow-y: auto; }
+  .panel h2 { position: sticky; top: 0; background: var(--panel); z-index: 1; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 14px 16px 6px; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; }
+  .stat b { display: block; font-size: 20px; letter-spacing: -0.02em; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .newbtn { margin: 10px 16px 6px; width: calc(100% - 32px); }
+  .item { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 11px 18px; cursor: pointer; }
+  .item:hover { background: #fafbfc; } .item.on { background: var(--brand-soft); }
+  .item .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .m { display: flex; gap: 8px; align-items: center; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
+  .chip { font-size: 11.5px; padding: 1px 9px; border-radius: 999px; font-weight: 600; background: var(--grey-soft); color: #344054; }
+  .chip.sent { background: var(--brand-soft); color: var(--brand); } .chip.won { background: var(--ok-soft); color: var(--ok); } .chip.lost { background: var(--bad-soft); color: var(--bad); }
+  .empty { padding: 22px; color: var(--muted); }
+  .form { padding: 18px 22px 26px; }
+  .form label { display: block; font-weight: 600; margin: 14px 0 4px; }
+  .form label small { font-weight: 400; color: var(--muted); }
+  .form input[type=text], .form input[type=email], .form input[type=password], .form textarea, .form select { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+  .form textarea { resize: vertical; line-height: 1.55; }
+  .row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+  .note { color: var(--muted); font-size: 13px; }
+  .warn { margin-top: 12px; background: var(--wait-soft); color: var(--wait); border: 1px solid #fedf89; border-radius: 10px; padding: 9px 12px; font-size: 13.5px; }
+  .warn p { margin: 0 0 4px; } .warn p:last-child { margin: 0; }
+  .err { color: var(--bad); font-size: 13.5px; margin-top: 10px; min-height: 20px; }
+  .auth { max-width: 400px; margin: 60px auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 26px 26px 22px; }
+  .auth h1 { font-size: 22px; } .auth p { color: var(--muted); margin: 4px 0 8px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 0 16px 20px; } .panel { height: auto; min-height: 0; } header { padding: 14px 16px; } }
+</style>
+</head>
+<body>
+<div id="auth" class="hidden">
+  <div class="auth form">
+    <h1>Proposal Writer</h1>
+    <p>Draft a proposal for a job post in a minute, using only what you tell it about yourself.</p>
+    <form id="authform">
+      <label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
+      <label for="password">Password <small id="pwhint" class="hidden">at least 10 characters</small></label><input id="password" type="password" autocomplete="current-password" required>
+      <div class="err" id="autherr" role="alert"></div>
+      <div class="row"><button class="btn primary" id="authgo">Log in</button><button type="button" class="link" id="authswitch">Create an account</button></div>
+    </form>
+  </div>
+</div>
+<div id="app" class="hidden">
+  <header>
+    <h1>Proposal Writer</h1>
+    <div class="pills">
+      <span class="pill use" id="usage"></span><span class="pill" id="mode"></span><span class="pill" id="who"></span>
+      <button class="btn" id="profilebtn">Profile</button><button class="btn" id="logout">Log out</button>
+    </div>
+  </header>
+  <main>
+    <section class="panel" aria-label="Proposals">
+      <h2>Your proposals</h2>
+      <div class="stats" id="stats"></div>
+      <button class="btn primary newbtn" id="newbtn">Write a new proposal</button>
+      <div id="list"></div>
+    </section>
+    <section class="panel" aria-label="Workspace"><h2 id="wtitle">Workspace</h2><div id="work"></div></section>
+  </main>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, t) => { const e = document.createElement(tag); if (cls) e.className = cls; if (t !== undefined) e.textContent = t; return e; };
+let me = null, proposals = [], selected = null, signup = false;
+async function api(path, method = "GET", body) {
+  const r = await fetch(path, { method, headers: { "Content-Type": "application/json", "X-Requested-With": "proposal-writer" }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== "/api/login") { show(false); throw new Error("Please log in."); }
+  if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Check what you entered and try again.");
+  return j;
+}
+function show(inApp) { $("auth").classList.toggle("hidden", inApp); $("app").classList.toggle("hidden", !inApp); }
+
+$("authswitch").onclick = () => { signup = !signup; $("authgo").textContent = signup ? "Create account" : "Log in"; $("authswitch").textContent = signup ? "I have an account" : "Create an account"; $("pwhint").classList.toggle("hidden", !signup); $("password").autocomplete = signup ? "new-password" : "current-password"; $("autherr").textContent = ""; };
+$("authform").onsubmit = async (e) => {
+  e.preventDefault(); $("autherr").textContent = "";
+  try { await api(signup ? "/api/signup" : "/api/login", "POST", { email: $("email").value, password: $("password").value }); $("password").value = ""; await boot(); }
+  catch (err) { $("autherr").textContent = err.message; }
+};
+$("logout").onclick = async () => { await api("/api/logout", "POST"); me = null; selected = null; show(false); };
+$("profilebtn").onclick = () => profileView();
+$("newbtn").onclick = () => composer();
+
+async function boot() {
+  try { me = await api("/api/me"); } catch (e) { show(false); return; }
+  show(true);
+  $("who").textContent = me.email; $("mode").textContent = me.mode === "claude" ? "Claude writes the drafts" : "Offline mode, plain template";
+  await refresh();
+  const p = await api("/api/profile");
+  if (!p.name) profileView(true); else if (!selected) composer();
+}
+async function refresh() {
+  me = await api("/api/me");
+  $("usage").textContent = me.usage.used + " of " + me.usage.limit + " proposals used this month";
+  const [list, stats] = await Promise.all([api("/api/proposals"), api("/api/stats")]);
+  proposals = list;
+  const s = $("stats"); s.innerHTML = "";
+  [["Written", stats.total], ["Sent", stats.sent], ["Won", stats.won], ["Win rate", stats.win_rate === null ? "n/a" : Math.round(stats.win_rate * 100) + "%"]].forEach(([k, v]) => { const d = el("div", "stat"); d.append(el("b", "", v), el("span", "", k)); s.appendChild(d); });
+  const l = $("list"); l.innerHTML = "";
+  if (!list.length) l.appendChild(el("div", "empty", "No proposals yet."));
+  list.forEach((p) => {
+    const b = el("button", "item" + (p.id === selected ? " on" : "")); b.appendChild(el("div", "t", p.title));
+    const m = el("div", "m"); m.append(el("span", "chip " + p.status, p.status), el("span", "", new Date(p.created_at * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short" })));
+    b.appendChild(m); b.onclick = () => editor(p.id); l.appendChild(b);
+  });
+}
+function field(label, input, hint) { const wrap = el("div"); const l = el("label", "", label + (hint ? " " : "")); if (hint) l.appendChild(el("small", "", hint)); wrap.append(l, input); return wrap; }
+function input(value, ph) { const i = el("input"); i.type = "text"; i.value = value || ""; if (ph) i.placeholder = ph; return i; }
+
+async function profileView(first) {
+  selected = null; $("wtitle").textContent = "Your profile"; await refresh();
+  const p = await api("/api/profile"); const f = el("div", "form"); $("work").innerHTML = ""; $("work").appendChild(f);
+  f.appendChild(el("p", "note", first ? "Start here. A draft can only claim what you write on this page, so it cannot invent experience for you." : "A draft can only claim what you write here."));
+  const name = input(p.name, "Your name"), headline = input(p.headline, "For example: Python developer for AI automation"), skills = input(p.skills.join(", "), "Python, FastAPI, n8n");
+  const proof = el("textarea"); proof.rows = 7; proof.value = p.proof_points.join("\n"); proof.placeholder = "Built a ... that ...";
+  const tone = el("select"); [["friendly", "Friendly"], ["formal", "Formal"]].forEach(([v, t]) => { const o = el("option", "", t); o.value = v; tone.appendChild(o); }); tone.value = p.tone;
+  f.append(field("Name", name), field("Headline", headline), field("Skills", skills, "separated by commas"), field("Proof points", proof, "one per line, true things you have done"), field("Tone", tone));
+  const err = el("div", "err"); const ok = el("span", "note"); const save = el("button", "btn primary", "Save profile");
+  save.onclick = async () => {
+    err.textContent = ""; ok.textContent = "";
+    try { await api("/api/profile", "PUT", { name: name.value, headline: headline.value, skills: skills.value.split(",").map((s) => s.trim()).filter(Boolean), proof_points: proof.value.split("\n").map((s) => s.trim()).filter(Boolean), tone: tone.value }); ok.textContent = "Saved."; if (first) composer(); }
+    catch (e) { err.textContent = e.message; }
+  };
+  const row = el("div", "row"); row.append(save, ok); f.append(err, row);
+}
+
+function composer() {
+  selected = null; $("wtitle").textContent = "New proposal"; refresh();
+  const f = el("div", "form"); $("work").innerHTML = ""; $("work").appendChild(f);
+  const job = el("textarea"); job.rows = 12; job.placeholder = "Paste the job post here";
+  const title = input("", "Optional, for your own list");
+  f.append(field("Job post", job, "at least 50 characters"), field("Title", title));
+  const err = el("div", "err"); const go = el("button", "btn primary", "Write the draft");
+  go.onclick = async () => {
+    err.textContent = ""; go.disabled = true; go.textContent = "Writing...";
+    try { const p = await api("/api/proposals/generate", "POST", { job_text: job.value, title: title.value || null }); await refresh(); editor(p.id); }
+    catch (e) { err.textContent = e.message; go.disabled = false; go.textContent = "Write the draft"; }
+  };
+  const row = el("div", "row"); row.append(go, el("span", "note", "Uses one proposal from this month's allowance.")); f.append(err, row);
+}
+
+async function editor(id) {
+  selected = id; const p = await api("/api/proposals/" + id); $("wtitle").textContent = "Proposal"; await refresh();
+  const f = el("div", "form"); $("work").innerHTML = ""; $("work").appendChild(f);
+  const title = input(p.title);
+  const status = el("select"); ["draft", "sent", "won", "lost"].forEach((s) => { const o = el("option", "", s); o.value = s; status.appendChild(o); }); status.value = p.status;
+  const body = el("textarea"); body.rows = 16; body.value = p.body;
+  f.append(field("Title", title), field("Draft", body), field("Status", status));
+  if (p.warnings.length) { const w = el("div", "warn"); p.warnings.forEach((t) => w.appendChild(el("p", "", t))); f.insertBefore(w, f.children[2]); }
+  const msg = el("span", "note"); const save = el("button", "btn primary", "Save");
+  save.onclick = async () => { try { await api("/api/proposals/" + id, "PUT", { title: title.value, body: body.value, status: status.value }); msg.textContent = "Saved."; await refresh(); } catch (e) { msg.textContent = e.message; } };
+  const copy = el("button", "btn", "Copy text"); copy.onclick = async () => { await navigator.clipboard.writeText(body.value); msg.textContent = "Copied."; };
+  const del = el("button", "btn danger", "Delete"); del.onclick = async () => { if (!confirm("Delete this proposal?")) return; await api("/api/proposals/" + id, "DELETE"); selected = null; composer(); };
+  const row = el("div", "row"); row.append(save, copy, del, msg); f.appendChild(row);
+  f.appendChild(el("p", "note", "Written by the " + p.engine + " writer. Nothing is sent anywhere. Copy it into the job site yourself."));
+}
+boot();
+</script>
+</body>
+</html>
