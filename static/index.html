@@ -170,7 +170,7 @@ async function editor(id) {
   const f = el("div", "form"); $("work").innerHTML = ""; $("work").appendChild(f);
   const title = input(p.title);
   const status = el("select"); ["draft", "sent", "won", "lost"].forEach((s) => { const o = el("option", "", s); o.value = s; status.appendChild(o); }); status.value = p.status;
-  const body = el("textarea"); body.rows = 16; body.value = p.body;
+  const body = el("textarea"); body.rows = 12; body.value = p.body;
   f.append(field("Title", title), field("Draft", body), field("Status", status));
   if (p.warnings.length) { const w = el("div", "warn"); p.warnings.forEach((t) => w.appendChild(el("p", "", t))); f.insertBefore(w, f.children[2]); }
   const msg = el("span", "note"); const save = el("button", "btn primary", "Save");
