@@ -2,7 +2,7 @@ import json
 from types import SimpleNamespace
 
 import anthropic
-import httpx
+import httpx2 as httpx  # the HTTP library the anthropic SDK itself uses
 import pytest
 
 from app.profile import Profile
